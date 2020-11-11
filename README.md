@@ -1,6 +1,15 @@
 # hero_of_the_storm
 
-A new Flutter project.
+## Postman call Heroes API
+
+[GET] http://hotsapi.net/api/v1/heroes
+*got data about all heroes*
+
+## Create DB
+
+https://konbert.com/convert
+JSON ---> SQLite DB 
+
 
 ## Getting Started
 
