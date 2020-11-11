@@ -1,9 +1,17 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:hero_of_the_storm/service/db_service.dart';
+// import 'package:hive/hive.dart';
+// import 'package:path_provider/path_provider.dart';
 
 import 'models/hero.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // final appDocumentDirectory = await getApplicationDocumentsDirectory();
+  // Hive.init(appDocumentDirectory.path);
   runApp(MyApp());
 }
 
@@ -55,16 +63,22 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  Future<List<Heroes>> getAllHeroes() async {
+  Future<List<Heroes>> callApiGetHeroes() async {
     var dio = Dio();
     var resp = await dio.get('http://hotsapi.net/api/v1/heroes');
-    print(resp.data.toString());
+    // print(resp.data.toString());
     List<Heroes> kq = List<Heroes>();
-    for(var r in resp.data){
+    var idx = 1;
+    for (var r in resp.data) {
       var item = Heroes.fromMap(r);
+      print('in ra item: ${item.toJson()}');
       kq.add(item);
+      
+      idx++;
     }
+    DbService().addHeroes(kq.first);
     return kq;
+    // return resp.data;
   }
 
   void _incrementCounter() {
@@ -77,6 +91,11 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
+
+  // @override
+  // void dispose() {
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -122,13 +141,28 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          _incrementCounter();
-          getAllHeroes();
-        },
-        tooltip: 'Increment',
-        child: Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () async {
+              // var ppp =
+               await DbService().getFirstHeroInDb();
+              // print('${ppp.name}');
+            },
+            tooltip: 'GetDB',
+            child: Icon(Icons.account_balance_sharp),
+          ),
+          SizedBox(height: 20,),
+          FloatingActionButton(
+            onPressed: () {
+              _incrementCounter();
+              callApiGetHeroes();
+            },
+            tooltip: 'Increment',
+            child: Icon(Icons.add),
+          ),
+        ],
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
