@@ -66,17 +66,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<List<Heroes>> callApiGetHeroes() async {
     var dio = Dio();
     var resp = await dio.get('http://hotsapi.net/api/v1/heroes');
-    // print(resp.data.toString());
     List<Heroes> kq = List<Heroes>();
-    var idx = 1;
     for (var r in resp.data) {
       var item = Heroes.fromMap(r);
       print('in ra item: ${item.toJson()}');
       kq.add(item);
-      
-      idx++;
+      DbService().addHeroes(item);
     }
-    DbService().addHeroes(kq.first);
+    // print('added 1 hero');
     return kq;
     // return resp.data;
   }
@@ -140,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           ],
         ),
-      ),
+      ),               
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [

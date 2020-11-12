@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:hero_of_the_storm/models/hero.dart';
@@ -35,7 +36,7 @@ class DbService {
         'name TEXT,'
         'short_name TEXT,'
         'attribute_id TEXT,'
-        'translations BLOB,'
+        'translations TEXT,'
         'role BLOB,'
         'type BLOB,'
         'release_date BLOB,'
@@ -53,11 +54,12 @@ class DbService {
 
   Future<void> getFirstHeroInDb() async {
     var dbClient = await db;
-    var resp = await dbClient.query('Heroes', limit: 1);
-    Heroes he = Heroes.fromMap(resp.first);
-    print('ggggg ${resp.first}');
-    print(' shotname ${he.iconUrl.split(':').first}');
+    var resp = await dbClient.query('Heroes');
+    int randomIndex = Random().nextInt(resp.length);
+    print('Tables [HEROES] contain ${resp.length} records');
+    Heroes he = Heroes.fromDb(resp[randomIndex]);
+    print('getFirstHeroInDb ${he.toJson()}');
+    print(' shotname ${he.iconUrl.the92X93}');
     
-    print('dd');
   }
 }
