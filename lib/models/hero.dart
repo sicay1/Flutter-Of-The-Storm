@@ -14,8 +14,8 @@ class Heroes {
     this.type,
     this.releaseDate,
     this.iconUrl,
-    // this.abilities,
-    // this.talents,
+    this.abilities,
+    this.talents,
   });
 
   String name;
@@ -26,47 +26,64 @@ class Heroes {
   Type type;
   DateTime releaseDate;
   HeroIconUrl iconUrl;
-  // List<Ability> abilities;
-  // List<Talent> talents;
+  List<Ability> abilities;
+  List<Talent> talents;
 
   factory Heroes.fromJson(String str) => Heroes.fromMap(json.decode(str));
 
   String toJson() => json.encode(toMap());
 
-  Map<String, dynamic> mapToJson() {
-    var translationsEncode =
-        jsonEncode(List<dynamic>.from(translations.map((x) => x)));
-    var iconUrlEncode = jsonEncode(iconUrl.toMap());
-    // var abilitiesEncode = List<dynamic>.from(abilities.map((x) => x.toMap()));
-    return {
-      "name": name == null ? null : name,
-      "short_name": shortName == null ? null : shortName,
-      "attribute_id": attributeId == null ? null : attributeId,
-      "translations": translations == null ? null : translationsEncode,
-      "role": role == null ? null : roleValues.reverse[role],
-      "type": type == null ? null : typeValues.reverse[type],
-      "release_date": releaseDate == null
-          ? null
-          : "${releaseDate.year.toString().padLeft(4, '0')}-${releaseDate.month.toString().padLeft(2, '0')}-${releaseDate.day.toString().padLeft(2, '0')}",
-      "icon_url": iconUrl == null ? null : iconUrlEncode, // iconUrl.toMap(),
-      // "abilities": abilities == null ? null : abilitiesEncode,
-      // "talents": talents == null ? null : List<dynamic>.from(talents.map((x) => x.toMap())),
-    };
-  }
+  // Map<String, dynamic> mapToJson() {
+  //   var translationsEncode =
+  //       jsonEncode(List<dynamic>.from(translations.map((x) => x)));
+  //   var iconUrlEncode = jsonEncode(iconUrl.toMap());
+  //   var abilitiesEncode = List<dynamic>.from(abilities.map((x) => x.toMap()));
+  //   return {
+  //     "name": name == null ? null : name,
+  //     "short_name": shortName == null ? null : shortName,
+  //     "attribute_id": attributeId == null ? null : attributeId,
+  //     "translations": translations == null ? null : translationsEncode,
+  //     "role": role == null ? null : roleValues.reverse[role],
+  //     "type": type == null ? null : typeValues.reverse[type],
+  //     "release_date": releaseDate == null
+  //         ? null
+  //         : "${releaseDate.year.toString().padLeft(4, '0')}-${releaseDate.month.toString().padLeft(2, '0')}-${releaseDate.day.toString().padLeft(2, '0')}",
+  //     "icon_url": iconUrl == null ? null : iconUrlEncode, // iconUrl.toMap(),
+  //     "abilities": abilities == null ? null : abilitiesEncode,
+  //     // "talents": talents == null ? null : List<dynamic>.from(talents.map((x) => x.toMap())),
+  //   };
+  // }
 
   factory Heroes.fromDb(Map<String, dynamic> json) {
     var translationsDecode =
         List<String>.from(jsonDecode(json["translations"]));
-    var iconUrlMap =
-        json["icon_url"] == null ? null : HeroIconUrl.fromMap(jsonDecode(json["icon_url"]));
-    // var abilities
+    var iconUrlMap = json["icon_url"] == null
+        ? null
+        : HeroIconUrl.fromMap(jsonDecode(json["icon_url"]));
+
+    var abilitiesData = jsonDecode(json["abilities"]);
+    List<Ability> abilitiesMap = List<Ability>();
+    for (var perMap in abilitiesData) {
+      abilitiesMap.add(Ability.fromJson(perMap));
+    }
+
+    var talentsData = jsonDecode(json["talents"]);
+    List<Talent> talentsMap = List<Talent>();
+    for(var perTalent in talentsData){
+      talentsMap.add(Talent.fromJson(perTalent));
+    }
+    // var talentsData = json["talents"] == null
+    //     ? null
+    //     : List<Talent>.from(json["talents"].map((x) => Talent.fromMap(x)));
+
     return Heroes(
       name: json["name"] == null ? null : json["name"],
       shortName: json["short_name"] == null ? null : json["short_name"],
       attributeId: json["attribute_id"] == null ? null : json["attribute_id"],
       translations: json["translations"] == null ? null : translationsDecode,
       iconUrl: iconUrlMap,
-      // abilities:  json["abilities"] == null ? null : translationsDecode,
+      abilities: abilitiesMap,
+      talents: talentsMap,
     );
   }
 
@@ -79,8 +96,12 @@ class Heroes {
     var releaseDateMap = json["release_date"] == null
         ? null
         : DateTime.parse(json["release_date"]);
-    // var abilitiesMap =
-    //     List<Ability>.from(json["abilities"].map((x) => Ability.fromMap(x)));
+    var abilitiesMap = json["abilities"] == null
+        ? null
+        : List<Ability>.from(json["abilities"].map((x) => Ability.fromMap(x)));
+    var talentsMap = json["talents"] == null
+        ? null
+        : List<Talent>.from(json["talents"].map((x) => Talent.fromMap(x)));
     return Heroes(
       name: json["name"] == null ? null : json["name"],
       shortName: json["short_name"] == null ? null : json["short_name"],
@@ -90,8 +111,8 @@ class Heroes {
       type: json["type"] == null ? null : typeValues.map[json["type"]],
       releaseDate: releaseDateMap,
       iconUrl: iconUrlMap,
-      // abilities: json["abilities"] == null ? null : abilitiesMap,
-      // talents: json["talents"] == null ? null : List<Talent>.from(json["talents"].map((x) => Talent.fromMap(x))),
+      abilities: abilitiesMap,
+      talents: talentsMap,
     );
   }
 
@@ -100,7 +121,14 @@ class Heroes {
         ? null
         : jsonEncode(List<dynamic>.from(translations.map((x) => x)));
     var iconUrlEncode = iconUrl == null ? null : jsonEncode(iconUrl.toMap());
-    // var abilitiesEncode = List<dynamic>.from(abilities.map((x) => x.toMap()));
+    var abilitiesEncode = abilities == null
+        ? null
+        : jsonEncode(
+            List<dynamic>.from(abilities.map((x) => jsonEncode(x.toMap()))));
+    var talentsEncode = talents == null
+        ? null
+        : jsonEncode(
+            List<dynamic>.from(talents.map((x) => jsonEncode(x.toMap()))));
     return {
       "name": name == null ? null : name,
       "short_name": shortName == null ? null : shortName,
@@ -112,8 +140,8 @@ class Heroes {
           ? null
           : "${releaseDate.year.toString().padLeft(4, '0')}-${releaseDate.month.toString().padLeft(2, '0')}-${releaseDate.day.toString().padLeft(2, '0')}",
       "icon_url": iconUrlEncode,
-      // "abilities": abilities == null ? null : abilitiesEncode,
-      // "talents": talents == null ? null : List<dynamic>.from(talents.map((x) => x.toMap())),
+      "abilities": abilitiesEncode,
+      "talents": talentsEncode,
     };
   }
 }
@@ -144,6 +172,18 @@ class Ability {
   factory Ability.fromJson(String str) => Ability.fromMap(json.decode(str));
 
   String toJson() => json.encode(toMap());
+
+  factory Ability.fromDb(Map<String, dynamic> json) => Ability(
+        owner: json["owner"] == null ? null : jsonDecode(json["owner"]),
+        name: json["name"] == null ? null : jsonDecode(json["name"]),
+        title: json["title"] == null ? null : json["title"],
+        description: json["description"] == null ? null : json["description"],
+        icon: json["icon"],
+        hotkey: json["hotkey"] == null ? null : json["hotkey"],
+        cooldown: json["cooldown"] == null ? null : json["cooldown"],
+        manaCost: json["mana_cost"] == null ? null : json["mana_cost"],
+        trait: json["trait"] == null ? null : json["trait"],
+      );
 
   factory Ability.fromMap(Map<String, dynamic> json) => Ability(
         owner: json["owner"] == null ? null : json["owner"],

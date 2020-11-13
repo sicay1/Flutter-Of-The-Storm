@@ -3,9 +3,11 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:hero_of_the_storm/service/db_service.dart';
+import 'package:logger/logger.dart';
 // import 'package:hive/hive.dart';
 // import 'package:path_provider/path_provider.dart';
 
+import 'Pages/tab6.dart';
 import 'models/hero.dart';
 
 Future<void> main() async {
@@ -37,7 +39,7 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Heroes of the storm'),
     );
   }
 }
@@ -65,11 +67,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<List<Heroes>> callApiGetHeroes() async {
     var dio = Dio();
+    var lg = Logger();
+    lg.i('start call hotsAPI.net');
     var resp = await dio.get('http://hotsapi.net/api/v1/heroes');
     List<Heroes> kq = List<Heroes>();
     for (var r in resp.data) {
       var item = Heroes.fromMap(r);
-      print('in ra item: ${item.toJson()}');
+      lg.i('in ra item: ${item.toJson()}');
       kq.add(item);
       DbService().addHeroes(item);
     }
@@ -102,65 +106,63 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            Text(
-              'You have pushed the button this many times:',
+    return MaterialApp(
+      home: DefaultTabController(
+        length: 6,
+        child: Scaffold(
+          appBar: AppBar(
+            bottom: TabBar(
+              tabs: [
+                Tab(icon: Icon(Icons.car_rental)),
+                Tab(icon: Icon(Icons.trending_neutral)),
+                Tab(icon: Icon(Icons.face)),
+                Tab(icon: Icon(Icons.gamepad)),
+                Tab(icon: Icon(Icons.bike_scooter)),
+                Tab(icon: Icon(Icons.train)),
+              ],
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-          ],
+            // Here we take the value from the MyHomePage object that was created by
+            // the App.build method, and use it to set our appbar title.
+            title: Center(child: Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),)),
+          ),
+          body: TabBarView(children: [
+            Text("tab1"),
+            Text("tab2"),
+            Text("tab3"),
+            Text("tab4"),
+            Text("tab5"),
+            Tab6(counter: _counter),
+          ]),
+          floatingActionButton: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              FloatingActionButton(
+                onPressed: () async {
+                  // var ppp =
+                  await DbService().getFirstHeroInDb();
+                  // print('${ppp.name}');
+                },
+                tooltip: 'GetDB',
+                child: Icon(Icons.account_balance_sharp),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              FloatingActionButton(
+                onPressed: () {
+                  _incrementCounter();
+                  callApiGetHeroes();
+                },
+                tooltip: 'Increment',
+                child: Icon(Icons.add),
+              ),
+            ],
+          ),
         ),
-      ),               
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          FloatingActionButton(
-            onPressed: () async {
-              // var ppp =
-               await DbService().getFirstHeroInDb();
-              // print('${ppp.name}');
-            },
-            tooltip: 'GetDB',
-            child: Icon(Icons.account_balance_sharp),
-          ),
-          SizedBox(height: 20,),
-          FloatingActionButton(
-            onPressed: () {
-              _incrementCounter();
-              callApiGetHeroes();
-            },
-            tooltip: 'Increment',
-            child: Icon(Icons.add),
-          ),
-        ],
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+      // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }
+
+

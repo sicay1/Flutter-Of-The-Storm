@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:hero_of_the_storm/models/hero.dart';
+import 'package:logger/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'dart:io' as io;
@@ -32,6 +33,7 @@ class DbService {
   }
 
   Future<void> _onCreate(Database db, int version) async {
+    var lg = Logger();
     await db.execute('CREATE TABLE Heroes('
         'name TEXT,'
         'short_name TEXT,'
@@ -44,7 +46,7 @@ class DbService {
         'abilities BLOB,'
         'talents BLOB'
         ')');
-    print("Table [data] are created");
+    lg.i("Table [data] are created");
   }
 
   Future<void> addHeroes(Heroes hero) async {
@@ -56,10 +58,13 @@ class DbService {
     var dbClient = await db;
     var resp = await dbClient.query('Heroes');
     int randomIndex = Random().nextInt(resp.length);
-    print('Tables [HEROES] contain ${resp.length} records');
+    var lg = Logger();
+    lg.d('Tables [HEROES] contain ${resp.length} records');
     Heroes he = Heroes.fromDb(resp[randomIndex]);
-    print('getFirstHeroInDb ${he.toJson()}');
-    print(' shotname ${he.iconUrl.the92X93}');
+    lg.i('getFirstHeroInDb ${he.toJson()}');
+    // print('the92X93 ${he.iconUrl.the92X93}');
+    // print('jsonEncode ${jsonEncode(he)}');
+    // print('get from db and print out random one \n ${jsonEncode(resp[randomIndex])}');
     
   }
 }
